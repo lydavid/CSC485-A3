@@ -96,16 +96,16 @@ class PartialParse(object):
             if len(self.stack) < 3:
                 raise ValueError("Illegal transition_id: Cannot LEFT-ARC: Stack is too small.")
 
-            #print("BEGIN LEFT-ARC")
-            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            print("BEGIN LEFT-ARC")
+            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
 
             idx_head = self.stack[-1]
             idx_dep = self.stack.pop(-2)
             new_dependency = (idx_head, idx_dep, deprel)
             self.arcs.append(new_dependency)
 
-            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
-            #print("END LEFT-ARC")
+            print("END LEFT-ARC")
+            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
 
         elif (transition_id == self.right_arc_id):
             # RIGHT-ARC: marks the first (most recently added) item on the stack as a dependent of the
@@ -113,16 +113,17 @@ class PartialParse(object):
 
             # should always be able to RIGHT-ARC, the final RIGHT-ARC is assigning the head word as dependent of ROOT
 
-            #print("BEGIN RIGHT-ARC")
-            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            print("BEGIN RIGHT-ARC")
+            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
 
             idx_head = self.stack[-2]
             idx_dep = self.stack.pop(-1)
             new_dependency = (idx_head, idx_dep, deprel)
             self.arcs.append(new_dependency)
 
-            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
-            #print("END RIGHT-ARC")
+            print("END RIGHT-ARC")
+            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            
 
         elif (transition_id == self.shift_id):
             # SHIFT: removes the first word from the buffer and pushes it onto the stack
@@ -131,13 +132,14 @@ class PartialParse(object):
             if (self.next == len(self.sentence)):
                 raise ValueError("Cannot SHIFT: Buffer is empty.")
 
-            #print("BEGIN SHIFT")
-            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            print("BEGIN SHIFT")
+            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+
             self.stack.append(self.next)
             self.next += 1
-            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
-            #print("END SHIFT")
 
+            print("END SHIFT")
+            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
 
         else:
             raise ValueError('Invalid transition_id.')
@@ -300,6 +302,21 @@ class PartialParse(object):
             raise ValueError('PartialParse already completed')
         transition_id, deprel = -1, None
         ### BEGIN STUDENT CODE
+
+        print("get_sentence_from_graph: ")
+        print(get_sentence_from_graph(graph))
+
+        # given projective graph, determine appropriate transition
+
+        for x in range(len(graph.nodes)):
+            print(graph.nodes[x])
+
+        import random
+        transition_id = random.randint(0,2)
+
+
+
+
         ### END STUDENT CODE
         return transition_id, deprel
 
@@ -360,13 +377,11 @@ def minibatch_parse(sentences, model, batch_size):
     # Initialize a shallow copy of partial parses called unfinished parses;
     unfinished_parses = partial_parses.copy()
 
-    print(partial_parses[0] == unfinished_parses[0])
-
     # while unfinished parses is not empty do
     while unfinished_parses:
 
-        print("partial_parses=%s\n" % ([pp.sentence for pp in partial_parses]))
-        print("unfinished_parses=%s\n" % ([up.sentence for up in unfinished_parses]))
+        #print("partial_parses=%s\n" % ([pp.sentence for pp in partial_parses]))
+        #print("unfinished_parses=%s\n" % ([up.sentence for up in unfinished_parses]))
 
         # Use the first batch_size parses in unfinished_parses as a minibatch;
         minibatch = []
@@ -377,7 +392,7 @@ def minibatch_parse(sentences, model, batch_size):
                 break;
             minibatch.append(unfinished_parses[x])
 
-        print("minibatch=%s\n" % minibatch)
+        #print("minibatch=%s\n" % minibatch)
 
         # Use the model to predict the next transition for each partial_parse in the minibatch;
         td_pairs = model.predict(minibatch)
@@ -386,39 +401,29 @@ def minibatch_parse(sentences, model, batch_size):
         # the index will still be correct
         for x in range(len(minibatch) - 1, -1, -1):
 
-
-            print(partial_parses[x] == unfinished_parses[x])
-
             # Remember that calls to parse_step may raise a ValueError exception.
-            # Remove any such ‘stuck’ parses from your list of unfinished parses
             try:
 
-                print(td_pairs)
+                #print(td_pairs)
                 # Perform a parse step on each partial_parse in the minibatch with its predicted transition;
-                print("parse_step(%s, %s)\n" % (td_pairs[x][0], td_pairs[x][1]))
+                #print("parse_step(%s, %s)\n" % (td_pairs[x][0], td_pairs[x][1]))
 
-
+                # find the same initial obj in partial_parses
+                # we do this, because after some removals form unfinished_parses, it will no longer be parallel to partial_parses
                 for i in range(0, len(partial_parses)):
                     if partial_parses[i] == minibatch[x]:
                         partial_parses[i].parse_step(td_pairs[x][0], td_pairs[x][1])
 
+                        print(partial_parses[i].arcs)
+                        print(unfinished_parses[x].arcs)
+
                         # Remove those parses that are completed from unfinished parses;
                         if (partial_parses[i].complete):
-                            print(unfinished_parses.pop(x).sentence)
+                            del unfinished_parses[x]
 
+            # Remove any such ‘stuck’ parses from your list of unfinished parses
             except (ValueError):
-                unfinished_parses.pop(x)
-
-
-            # when we remove an unfinished_parse, it is now no longer lined up parallelly to partial_parses
-            # which is why we are getting the index error
-
-            
-
-
-        
-
-
+                del unfinished_parses[x]
 
     # return The arcs for each (now completed) parse in partial parses.
     arcs = []
