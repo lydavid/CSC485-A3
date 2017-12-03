@@ -164,6 +164,33 @@ class PartialParse(object):
                 1, etc.
         '''
         ### BEGIN STUDENT CODE
+
+        deps = []
+        
+        if n == None:
+            # get all left-most dependents
+
+            # search through the entirety of self.arcs list
+            # this is assuming that dependencies are added in order -> which they should
+            for dep in range(0, len(self.arcs)):
+                if self.arcs[dep][0] == sentence_idx:
+                    deps.append(self.arcs[dep][1])
+
+        else:
+            # get n left-most dependents
+
+            deps_count = 0
+
+            for dep in range(0, len(self.arcs)):
+
+                # similar to above but we exit once we have found n left-most dependents
+                if deps_count == n:
+                    break;
+
+                if self.arcs[dep][0] == sentence_idx:
+                    deps.append(self.arcs[dep][1])
+                    deps_count += 1
+
         ### END STUDENT CODE
         return deps
 
@@ -187,6 +214,33 @@ class PartialParse(object):
                 1, etc.
         '''
         ### BEGIN STUDENT CODE
+
+        deps = []
+        
+        if n == None:
+            # get all right-most dependents
+
+            # search through the entirety of self.arcs list
+            # this is assuming that dependencies are added in order -> which they should
+            for dep in range(len(self.arcs) - 1, -1, -1):
+                if self.arcs[dep][0] == sentence_idx:
+                    deps.append(self.arcs[dep][1])
+
+        else:
+            # get n right-most dependents
+
+            deps_count = 0
+
+            for dep in range(len(self.arcs) - 1, -1, -1):
+
+                # similar to above but we exit once we have found n right-most dependents
+                if deps_count == n:
+                    break;
+
+                if self.arcs[dep][0] == sentence_idx:
+                    deps.append(self.arcs[dep][1])
+                    deps_count += 1
+
         ### END STUDENT CODE
         return deps
 
