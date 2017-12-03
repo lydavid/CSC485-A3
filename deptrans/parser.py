@@ -1,3 +1,5 @@
+### David Ly, lydavid1, 1001435501 ###
+
 '''Functions and classes that handle parsing'''
 
 from __future__ import absolute_import
@@ -348,6 +350,81 @@ def minibatch_parse(sentences, model, batch_size):
             arcs[i] should contain the arcs for sentences[i]).
     """
     ### YOUR CODE HERE
+
+    # Initialize a list of partial parses, one for each sentence in sentences;
+    partial_parses = []
+    for sentence in sentences:
+        pp = PartialParse(sentence)
+        partial_parses.append(pp)
+
+    # Initialize a shallow copy of partial parses called unfinished parses;
+    unfinished_parses = partial_parses.copy()
+
+    print(partial_parses[0] == unfinished_parses[0])
+
+    # while unfinished parses is not empty do
+    while unfinished_parses:
+
+        print("partial_parses=%s\n" % ([pp.sentence for pp in partial_parses]))
+        print("unfinished_parses=%s\n" % ([up.sentence for up in unfinished_parses]))
+
+        # Use the first batch_size parses in unfinished_parses as a minibatch;
+        minibatch = []
+        for x in range(0, batch_size):
+
+            # stops early in the case batch_size is greater than the size of unfinished_parses
+            if (x >= len(unfinished_parses)):
+                break;
+            minibatch.append(unfinished_parses[x])
+
+        print("minibatch=%s\n" % minibatch)
+
+        # Use the model to predict the next transition for each partial_parse in the minibatch;
+        td_pairs = model.predict(minibatch)
+
+        # go through these backwards so that when we remove an unfinished_parse, the next time we try to remove another unfinished_parse,
+        # the index will still be correct
+        for x in range(len(minibatch) - 1, -1, -1):
+
+
+            print(partial_parses[x] == unfinished_parses[x])
+
+            # Remember that calls to parse_step may raise a ValueError exception.
+            # Remove any such ‘stuck’ parses from your list of unfinished parses
+            try:
+
+                print(td_pairs)
+                # Perform a parse step on each partial_parse in the minibatch with its predicted transition;
+                print("parse_step(%s, %s)\n" % (td_pairs[x][0], td_pairs[x][1]))
+
+
+                for i in range(0, len(partial_parses)):
+                    if partial_parses[i] == minibatch[x]:
+                        partial_parses[i].parse_step(td_pairs[x][0], td_pairs[x][1])
+
+                        # Remove those parses that are completed from unfinished parses;
+                        if (partial_parses[i].complete):
+                            print(unfinished_parses.pop(x).sentence)
+
+            except (ValueError):
+                unfinished_parses.pop(x)
+
+
+            # when we remove an unfinished_parse, it is now no longer lined up parallelly to partial_parses
+            # which is why we are getting the index error
+
+            
+
+
+        
+
+
+
+    # return The arcs for each (now completed) parse in partial parses.
+    arcs = []
+    for x in range(0, len(partial_parses)):
+        arcs.append(partial_parses[x].arcs)
+
     ### END YOUR CODE
     return arcs
 
