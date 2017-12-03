@@ -63,7 +63,7 @@ class PartialParse(object):
         ### BEGIN STUDENT CODE
 
         # A PartialParse is complete when: 1. the buffer is empty (next == len(sentence)) and 2. the stack is of size 1
-        return (self.next == len(self.sentence)) and len(self.stack) == 1
+        return self.next == len(self.sentence) and len(self.stack) == 1
 
         ### END STUDENT CODE
 
@@ -87,7 +87,7 @@ class PartialParse(object):
         '''
         ### BEGIN STUDENT CODE
 
-        if (transition_id == self.left_arc_id):
+        if transition_id == self.left_arc_id:
             # LEFT-ARC: marks the second (second most recently added) item on the stack as a dependent
             #           of the first item and removes the second item from the stack.
 
@@ -107,7 +107,7 @@ class PartialParse(object):
             print("END LEFT-ARC")
             print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
 
-        elif (transition_id == self.right_arc_id):
+        elif transition_id == self.right_arc_id:
             # RIGHT-ARC: marks the first (most recently added) item on the stack as a dependent of the
             #            second item and removes the first item from the stack.
 
@@ -125,11 +125,11 @@ class PartialParse(object):
             print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
             
 
-        elif (transition_id == self.shift_id):
+        elif transition_id == self.shift_id:
             # SHIFT: removes the first word from the buffer and pushes it onto the stack
 
             # cannot SHIFT when buffer is empty
-            if (self.next == len(self.sentence)):
+            if self.next == len(self.sentence):
                 raise ValueError("Cannot SHIFT: Buffer is empty.")
 
             print("BEGIN SHIFT")
@@ -307,12 +307,58 @@ class PartialParse(object):
         print(get_sentence_from_graph(graph))
 
         # given projective graph, determine appropriate transition
-
-        for x in range(len(graph.nodes)):
+        print("\n")
+        for x in range(0, len(graph.nodes)):
             print(graph.nodes[x])
+            print("\n")
 
-        import random
-        transition_id = random.randint(0,2)
+        #import random
+
+        #if self.next == len(self.sentence):
+        #    transition_id = 1
+        #else:
+        #    transition_id = 2
+
+
+
+        # if there is at least 3 items in stack, check if latest 2 are related by left-arc in graph
+        if len(self.stack) >= 3:
+            # get the latest id in stack
+            latest_id = self.stack[-1] # sentence[i]
+
+            # get second latest id in stack
+            second_latest_id = self.stack[-2]
+
+            # check in graph.nodes whether the node with 2nd_latest_id is dependent on the node with latest_id
+
+            # if so, choose left-arc and set deprel to 
+
+
+
+
+            if graph.nodes[second_latest_id]['rel'] in graph.nodes[latest_id]['deps']:
+                transition_id = self.left_arc_id
+                deprel = graph.nodes[second_latest_id]['rel']
+            else:
+
+                # check if right-arc possible AND there are no right dependents not in arcs
+                transition_id = self.shift_id
+
+
+
+        else:
+            transition_id = self.shift_id
+
+        #  if so, left-arc
+        #  otherwise check if they are related by right-arc in graph AND the item to be mark for right-arc has no left dependents -> don't really need to worry about this case yet, cause if
+        #   if so, right-arc
+        #   if related by right-arc 
+
+
+        # if there is only 1 item in stack, and buffer is not empty, choose to shift
+
+
+        # if buffer is empty, keep right-arc til finish
 
 
 
@@ -414,8 +460,8 @@ def minibatch_parse(sentences, model, batch_size):
                     if partial_parses[i] == minibatch[x]:
                         partial_parses[i].parse_step(td_pairs[x][0], td_pairs[x][1])
 
-                        print(partial_parses[i].arcs)
-                        print(unfinished_parses[x].arcs)
+                        #print(partial_parses[i].arcs)
+                        #print(unfinished_parses[x].arcs)
 
                         # Remove those parses that are completed from unfinished parses;
                         if (partial_parses[i].complete):
