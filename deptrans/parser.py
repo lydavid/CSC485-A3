@@ -59,6 +59,10 @@ class PartialParse(object):
         Assume that the PartialParse is valid
         '''
         ### BEGIN STUDENT CODE
+
+        # A PartialParse is complete when: 1. the buffer is empty (next == len(sentence)) and 2. the stack is of size 1
+        return (self.next == len(self.sentence)) and len(self.stack) == 1
+
         ### END STUDENT CODE
 
     def parse_step(self, transition_id, deprel=None):
@@ -80,6 +84,63 @@ class PartialParse(object):
                 given the current state
         '''
         ### BEGIN STUDENT CODE
+
+        if (transition_id == self.left_arc_id):
+            # LEFT-ARC: marks the second (second most recently added) item on the stack as a dependent
+            #           of the first item and removes the second item from the stack.
+
+            # cannot LEFT-ARC if there is not at least 3 items in stack [ROOT, x, y]
+            # otherwise we might assign ROOT as a dependent of something
+            if len(self.stack) < 3:
+                raise ValueError("Illegal transition_id: Cannot LEFT-ARC: Stack is too small.")
+
+            #print("BEGIN LEFT-ARC")
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+
+            idx_head = self.stack[-1]
+            idx_dep = self.stack.pop(-2)
+            new_dependency = (idx_head, idx_dep, deprel)
+            self.arcs.append(new_dependency)
+
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            #print("END LEFT-ARC")
+
+        elif (transition_id == self.right_arc_id):
+            # RIGHT-ARC: marks the first (most recently added) item on the stack as a dependent of the
+            #            second item and removes the first item from the stack.
+
+            # should always be able to RIGHT-ARC, the final RIGHT-ARC is assigning the head word as dependent of ROOT
+
+            #print("BEGIN RIGHT-ARC")
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+
+            idx_head = self.stack[-2]
+            idx_dep = self.stack.pop(-1)
+            new_dependency = (idx_head, idx_dep, deprel)
+            self.arcs.append(new_dependency)
+
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            #print("END RIGHT-ARC")
+
+        elif (transition_id == self.shift_id):
+            # SHIFT: removes the first word from the buffer and pushes it onto the stack
+
+            # cannot SHIFT when buffer is empty
+            if (self.next == len(self.sentence)):
+                raise ValueError("Cannot SHIFT: Buffer is empty.")
+
+            #print("BEGIN SHIFT")
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            self.stack.append(self.next)
+            self.next += 1
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            #print("END SHIFT")
+
+
+        else:
+            raise ValueError('Invalid transition_id.')
+
+
         ### END STUDENT CODE
 
 
