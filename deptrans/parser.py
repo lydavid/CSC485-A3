@@ -342,12 +342,21 @@ class PartialParse(object):
             else:
 
                 # check if right-arc possible AND there are no right dependents not in arcs
-                transition_id = self.shift_id
+                if graph.nodes[latest_id]['rel'] in graph.nodes[second_latest_id]['deps']:
+                    transition_id = self.right_arc_id
+                    deprel = graph.nodes[latest_id]['rel']
+                else:
+                    transition_id = self.shift_id
 
 
 
         else:
-            transition_id = self.shift_id
+
+            if self.next == len(self.sentence):
+                transition_id = self.right_arc_id
+                deprel = graph.nodes[self.stack[-1]]['rel']
+            else:
+                transition_id = self.shift_id
 
         #  if so, left-arc
         #  otherwise check if they are related by right-arc in graph AND the item to be mark for right-arc has no left dependents -> don't really need to worry about this case yet, cause if
