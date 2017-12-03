@@ -303,52 +303,28 @@ class PartialParse(object):
         transition_id, deprel = -1, None
         ### BEGIN STUDENT CODE
 
-        print("get_sentence_from_graph: ")
-        print(get_sentence_from_graph(graph))
-
-        # given projective graph, determine appropriate transition
-        print("\n")
-        for x in range(0, len(graph.nodes)):
-            print(graph.nodes[x])
-            print("\n")
-
-        #import random
-
-        #if self.next == len(self.sentence):
-        #    transition_id = 1
-        #else:
-        #    transition_id = 2
-
-
-
-        # if there is at least 3 items in stack, check if latest 2 are related by left-arc in graph
+        
         if len(self.stack) >= 3:
             # get the latest id in stack
-            latest_id = self.stack[-1] # sentence[i]
-
+            latest_id = self.stack[-1]
             # get second latest id in stack
             second_latest_id = self.stack[-2]
 
-            # check in graph.nodes whether the node with 2nd_latest_id is dependent on the node with latest_id
-
-            # if so, choose left-arc and set deprel to 
-
-
-
-
+            # if there is at least 3 items in stack, check if latest 2 are related by left-arc in graph
+            # check in graph.nodes whether the node with second_latest_id is dependent on the node with latest_id
             if graph.nodes[second_latest_id]['rel'] in graph.nodes[latest_id]['deps']:
+                # if so, choose left-arc and set deprel to it
                 transition_id = self.left_arc_id
                 deprel = graph.nodes[second_latest_id]['rel']
+
             else:
 
-                # check if right-arc possible AND there are no right dependents not in arcs
+                # otherwise, check if right-arc possible AND there are no right dependents not in arcs
                 if graph.nodes[latest_id]['rel'] in graph.nodes[second_latest_id]['deps']:
                     transition_id = self.right_arc_id
                     deprel = graph.nodes[latest_id]['rel']
                 else:
                     transition_id = self.shift_id
-
-
 
         else:
 
@@ -357,20 +333,6 @@ class PartialParse(object):
                 deprel = graph.nodes[self.stack[-1]]['rel']
             else:
                 transition_id = self.shift_id
-
-        #  if so, left-arc
-        #  otherwise check if they are related by right-arc in graph AND the item to be mark for right-arc has no left dependents -> don't really need to worry about this case yet, cause if
-        #   if so, right-arc
-        #   if related by right-arc 
-
-
-        # if there is only 1 item in stack, and buffer is not empty, choose to shift
-
-
-        # if buffer is empty, keep right-arc til finish
-
-
-
 
         ### END STUDENT CODE
         return transition_id, deprel
