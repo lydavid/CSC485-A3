@@ -16,7 +16,7 @@ from utils.model import Model
 from data import load_and_preprocess_data
 from data import score_arcs
 from initialization import xavier_weight_init
-from parser import minibatch_parse
+from parser_util.parser import minibatch_parse
 from utils.generic_utils import Progbar
 
 class Config(object):
@@ -82,6 +82,13 @@ class ParserModel(Model):
         (Don't change the variable names)
         """
         ### BEGIN YOUR CODE
+
+        self.word_id_placeholder = tf.placeholder(dtype=tf.int32, shape=(None, self.config.n_word_features))#n_word_features)) # these are not defined...
+        self.tag_id_placeholder = tf.placeholder(dtype=tf.int32, shape=(None, self.config.n_tag_features))
+        self.deprel_id_placeholder = tf.placeholder(dtype=tf.int32, shape=(None, self.config.n_deprel_features))
+        self.class_placeholder = tf.placeholder(dtype=tf.float32, shape=(None, self.config.n_classes))
+        self.dropout_placeholder = tf.placeholder(dtype=tf.float32, shape=()) # scalar rank
+
         ### END YOUR CODE
 
     def create_feed_dict(
@@ -110,6 +117,27 @@ class ParserModel(Model):
             feed_dict: The feed dictionary mapping from placeholders to values.
         """
         ### BEGIN YOUR CODE
+
+        feed_dict = {}
+
+        #print("word_id_batch=%s" % word_id_batch)
+
+        if word_id_batch:
+            feed_dict[self.word_id_placeholder] = tf.constant(word_id_batch, dtype=tf.int32) # make these constant Tensor?
+
+        if tag_id_batch:
+            feed_dict[self.tag_id_placeholder] = tf.constant(tag_id_batch, dtype=tf.int32)
+
+        if deprel_id_batch:
+            feed_dict[self.deprel_id_placeholder] = tf.constant(deprel_id_batch, dtype=tf.int32)
+
+        if class_batch:
+            feed_dict[self.class_placeholder] = tf.constant(class_batch, dtype=tf.float32)
+
+        if dropout:
+            feed_dict[self.dropout_placeholder] = tf.constant(dropout, dtype=tf.float32)
+
+
         ### END YOUR CODE
         return feed_dict
 
@@ -145,6 +173,20 @@ class ParserModel(Model):
                 (None, n_deprel_features * embed_size)
         """
         ### BEGIN YOUR CODE
+
+        word_embeddings = tf.Variable(self.word_embeddings, dtype=tf.float32)
+
+        xavier_initializer = xavier_weight_init()
+        shape = (1,)
+        xavier_mat = xavier_initializer(shape)
+
+        tag_embeddings = tf.Variable(xavier_mat, dtype=tf.float32)
+        deprel_embeddings = tf.Variable(xavier_mat, dtype=tf.float32)
+
+        # use tf.Variable
+
+        # tf.nn.embedding_lookup
+
         ### END YOUR CODE
         return word_embeddings, tag_embeddings, deprel_embeddings
 
@@ -152,7 +194,7 @@ class ParserModel(Model):
         """Adds the single layer neural network
 
         The l
-            h = Relu(W_w x_w + W_t x_t + W_d x_d + b1)
+            h = Relu(W_w x_w + W_t x_t + W_d x_d + b1) # correction: h = ReLU(x_w W_w + x_t W_t + x_d W_d + b1)
             h_drop = Dropout(h, dropout_rate)
             pred = h_drop U + b2
 
@@ -182,6 +224,9 @@ class ParserModel(Model):
         """
         x_w, x_t, x_d = self.add_embeddings()
         ### BEGIN YOUR CODE
+
+
+
         ### END YOUR CODE
         return pred
 
@@ -202,6 +247,9 @@ class ParserModel(Model):
             loss: A 0-d tensor (scalar)
         """
         ### BEGIN YOUR CODE
+
+
+
         ### END YOUR CODE
         return loss
 
@@ -221,6 +269,9 @@ class ParserModel(Model):
             train_op: The Op for training.
         """
         ### BEGIN YOUR CODE
+
+        
+        
         ### END YOUR CODE
         return train_op
 
