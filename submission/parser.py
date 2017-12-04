@@ -390,9 +390,6 @@ def minibatch_parse(sentences, model, batch_size):
     # while unfinished parses is not empty do
     while unfinished_parses:
 
-        #print("partial_parses=%s\n" % ([pp.sentence for pp in partial_parses]))
-        #print("unfinished_parses=%s\n" % ([up.sentence for up in unfinished_parses]))
-
         # Use the first batch_size parses in unfinished_parses as a minibatch;
         minibatch = []
         for x in range(0, batch_size):
@@ -401,8 +398,6 @@ def minibatch_parse(sentences, model, batch_size):
             if (x >= len(unfinished_parses)):
                 break;
             minibatch.append(unfinished_parses[x])
-
-        #print("minibatch=%s\n" % minibatch)
 
         # Use the model to predict the next transition for each partial_parse in the minibatch;
         td_pairs = model.predict(minibatch)
@@ -414,18 +409,13 @@ def minibatch_parse(sentences, model, batch_size):
             # Remember that calls to parse_step may raise a ValueError exception.
             try:
 
-                #print(td_pairs)
                 # Perform a parse step on each partial_parse in the minibatch with its predicted transition;
-                #print("parse_step(%s, %s)\n" % (td_pairs[x][0], td_pairs[x][1]))
 
                 # find the same initial obj in partial_parses
                 # we do this, because after some removals form unfinished_parses, it will no longer be parallel to partial_parses
                 for i in range(0, len(partial_parses)):
                     if partial_parses[i] == minibatch[x]:
                         partial_parses[i].parse_step(td_pairs[x][0], td_pairs[x][1])
-
-                        #print(partial_parses[i].arcs)
-                        #print(unfinished_parses[x].arcs)
 
                         # Remove those parses that are completed from unfinished parses;
                         if (partial_parses[i].complete):
