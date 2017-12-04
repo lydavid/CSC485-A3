@@ -96,16 +96,16 @@ class PartialParse(object):
             if len(self.stack) < 3:
                 raise ValueError("Illegal transition_id: Cannot LEFT-ARC: Stack is too small.")
 
-            print("BEGIN LEFT-ARC")
-            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            #print("BEGIN LEFT-ARC")
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
 
             idx_head = self.stack[-1]
             idx_dep = self.stack.pop(-2)
             new_dependency = (idx_head, idx_dep, deprel)
             self.arcs.append(new_dependency)
 
-            print("END LEFT-ARC")
-            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            #print("END LEFT-ARC")
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
 
         elif transition_id == self.right_arc_id:
             # RIGHT-ARC: marks the first (most recently added) item on the stack as a dependent of the
@@ -113,16 +113,16 @@ class PartialParse(object):
 
             # should always be able to RIGHT-ARC, the final RIGHT-ARC is assigning the head word as dependent of ROOT
 
-            print("BEGIN RIGHT-ARC")
-            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            #print("BEGIN RIGHT-ARC")
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
 
             idx_head = self.stack[-2]
             idx_dep = self.stack.pop(-1)
             new_dependency = (idx_head, idx_dep, deprel)
             self.arcs.append(new_dependency)
 
-            print("END RIGHT-ARC")
-            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            #print("END RIGHT-ARC")
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
             
 
         elif transition_id == self.shift_id:
@@ -132,14 +132,14 @@ class PartialParse(object):
             if self.next == len(self.sentence):
                 raise ValueError("Cannot SHIFT: Buffer is empty.")
 
-            print("BEGIN SHIFT")
-            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            #print("BEGIN SHIFT")
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
 
             self.stack.append(self.next)
             self.next += 1
 
-            print("END SHIFT")
-            print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
+            #print("END SHIFT")
+            #print("stack: %s\n buffer: %s\n next: %s\n arcs: %s\n" % (self.stack, self.sentence[self.next:], self.next, self.arcs))
 
         else:
             raise ValueError('Invalid transition_id.')
@@ -734,17 +734,16 @@ dexterity NOUN 6 pobj
         ]
     )
     ex_tids = [
-        pp.shift_id, pp.shift_id, pp.left_arc_id, # 0 1 2 3
-        pp.shift_id, pp.shift_id, pp.shift_id, # 0 1 3 4
-        pp.left_arc_id, pp.left_arc_id, pp.right_arc_id, # 0 1 3 5
-        pp.shift_id, pp.shift_id, # 0 1 5
-        pp.right_arc_id, pp.right_arc_id, pp.right_arc_id # 0
+        pp.shift_id, pp.shift_id, pp.left_arc_id,
+        pp.shift_id, pp.shift_id, pp.shift_id,
+        pp.left_arc_id, pp.left_arc_id, pp.right_arc_id,
+        pp.shift_id, pp.shift_id,
+        pp.right_arc_id, pp.right_arc_id, pp.right_arc_id
     ]
     assert transition_ids == ex_tids, \
         "oracle2 test resulted in transitions {}, expected {}".format(
             transition_ids, ex_tids)
     print('oracle2 test passed!')
-
 
 if __name__ == '__main__':
     test_parse_steps()
