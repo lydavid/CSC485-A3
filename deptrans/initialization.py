@@ -31,6 +31,18 @@ def xavier_weight_init():
              	Xavier distribution.
         """
         ### BEGIN YOUR CODE
+
+        # sum of sizes of shape's dimensions
+        sum_of_sizes_of_shape_d = 0
+        for i in range(len(shape)):
+            sum_of_sizes_of_shape_d += shape[i]
+
+        # calculate our epsilon
+        epsilon = np.sqrt(6) / np.sqrt(sum_of_sizes_of_shape_d)
+
+        # uniform random sample
+        out = tf.random_uniform(shape=shape, minval=-epsilon, maxval=epsilon)
+        
         ### END YOUR CODE
         return out
     # Returns defined initializer function.
