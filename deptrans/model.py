@@ -83,7 +83,7 @@ class ParserModel(Model):
         """
         ### BEGIN YOUR CODE
 
-        self.word_id_placeholder = tf.placeholder(dtype=tf.int32, shape=(None, self.config.n_word_features))#n_word_features)) # these are not defined...
+        self.word_id_placeholder = tf.placeholder(dtype=tf.int32, shape=(None, self.config.n_word_features))
         self.tag_id_placeholder = tf.placeholder(dtype=tf.int32, shape=(None, self.config.n_tag_features))
         self.deprel_id_placeholder = tf.placeholder(dtype=tf.int32, shape=(None, self.config.n_deprel_features))
         self.class_placeholder = tf.placeholder(dtype=tf.float32, shape=(None, self.config.n_classes))
@@ -120,8 +120,6 @@ class ParserModel(Model):
 
         feed_dict = {}
 
-        #print("word_id_batch=%s" % word_id_batch)
-
         if word_id_batch:
             feed_dict[self.word_id_placeholder] = tf.constant(word_id_batch, dtype=tf.int32) # make these constant Tensor?
 
@@ -136,7 +134,6 @@ class ParserModel(Model):
 
         if dropout:
             feed_dict[self.dropout_placeholder] = tf.constant(dropout, dtype=tf.float32)
-
 
         ### END YOUR CODE
         return feed_dict
@@ -194,7 +191,7 @@ class ParserModel(Model):
         """Adds the single layer neural network
 
         The l
-            h = Relu(W_w x_w + W_t x_t + W_d x_d + b1) # correction: h = ReLU(x_w W_w + x_t W_t + x_d W_d + b1)
+            h = Relu(x_w W_w + x_t W_t + x_d W_d + b1) # correction added
             h_drop = Dropout(h, dropout_rate)
             pred = h_drop U + b2
 
@@ -225,7 +222,43 @@ class ParserModel(Model):
         x_w, x_t, x_d = self.add_embeddings()
         ### BEGIN YOUR CODE
 
+        xavier_initializer = xavier_weight_init()
 
+        shape = (self.config.n_word_features * self.config.embed_size, self.config.hidden_size)
+        xavier_mat = xavier_initializer(shape)
+        W_w = tf.Variable(xavier_mat, dtype=tf.float32)
+
+        shape = (self.config.n_tag_features * self.config.embed_size, self.config.hidden_size)
+        xavier_mat = xavier_initializer(shape)
+        W_t = tf.Variable(xavier_mat, dtype=tf.float32)
+
+        shape = (self.config.n_deprel_features * self.config.embed_size, self.config.hidden_size)
+        xavier_mat = xavier_initializer(shape)
+        W_d = tf.Variable(xavier_mat, dtype=tf.float32)
+
+
+        b1 = tf.Variable(tf.zeros(shape=(self.config.hidden_size, )), dtype=tf.float32)
+
+        shape = (self.config.hidden_size, self.config.n_classes)
+        xavier_mat = xavier_initializer(shape)
+        U = tf.Variable(xavier_mat, dtype=tf.float32)
+
+        b2 = tf.Variable(tf.zeros(shape=(self.config.n_classes)), dtype=tf.float32)
+
+        h = tf.nn.relu(x_w * W_w + x_t * W_t + x_d * W_d + b1)
+
+
+        h_drop = tf.nn.dropout(h, self.dropout_placeholder)
+
+        # dropout(
+        #    x,
+        #    keep_prob, -> self.dropout_placeholder
+        #    noise_shape=None,
+        #    seed=None,
+        #    name=None
+        #)
+
+        pred = tf.Tensor(h_drop * U + b2, shape=(self.config.batch_size, self.config.n_classes))
 
         ### END YOUR CODE
         return pred
