@@ -19,8 +19,8 @@ from nltk.corpus.util import LazyCorpusLoader
 from nltk.data import path
 from nltk.parse import DependencyGraph
 
-from parser import PartialParse
-from parser import get_sentence_from_graph
+from parser_util.parser import PartialParse
+from parser_util.parser import get_sentence_from_graph
 
 class UniversalDependencyCorpusReader(SyntaxCorpusReader):
     '''Update to DependencyCorpusReader to account for 10-field conllu fmt'''
