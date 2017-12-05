@@ -1,3 +1,5 @@
+### David Ly, lydavid1, 1001435501 ###
+
 '''Statistical modelling/parsing classes'''
 
 from __future__ import absolute_import
@@ -260,20 +262,18 @@ class ParserModel(Model):
 
         b2 = tf.Variable(tf.zeros(shape=(self.config.n_classes)), dtype=tf.float32)
 
-        w = tf.matmul(x_w, W_w) # [?, 900] [900, 200]
-        t = tf.matmul(x_t, W_t) # [?, 900] [900, 200]
-        d = tf.matmul(x_d, W_d) # [?, 600] [600, 200]
-        
-        
+        w = tf.matmul(x_w, W_w)
+        t = tf.matmul(x_t, W_t)
+        d = tf.matmul(x_d, W_d)
+
         wt = tf.add(w, t)
-        wtd = tf.add(wt, d) # for some reason d is a different size from the others
+        wtd = tf.add(wt, d)
         wtdb = tf.add(wtd, b1)
 
-        h = tf.nn.relu(wtdb)
-
         #h = tf.nn.relu((x_w * W_w) + (x_t * W_t) + (x_d * W_d) + b1)
+        h = tf.nn.relu(wtdb)
         h_drop = tf.nn.dropout(h, self.dropout_placeholder)
-        pred = tf.matmul(h_drop, U) + b2 #tf.constant(tf.matmul(h_drop, U) + b2, shape=(self.config.batch_size, self.config.n_classes))
+        pred = tf.matmul(h_drop, U) + b2
 
         ### END YOUR CODE
         return pred
@@ -362,6 +362,13 @@ class ParserModel(Model):
         '''LAS on either training or test sets'''
         act_arcs = minibatch_parse(sentences, self, self.config.batch_size)
         ex_arcs = tuple([(a[0], a[1], self.transducer.id2deprel[a[2]]) for a in pp] for pp in ex_arcs)
+
+        # TA modification to generate q2b.txt
+        import json                                                             
+        with open('q2btest.txt', 'w+') as f:                                    
+            for row in act_arcs:                                                
+                f.write('%s\n' % json.dumps(row)) 
+
         return score_arcs(act_arcs, ex_arcs)
 
     def __init__(self, transducer, sess, config, word_embeddings):

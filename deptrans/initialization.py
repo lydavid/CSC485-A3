@@ -1,3 +1,5 @@
+### David Ly, lydavid1, 1001435501 ###
+
 '''Initialization methods'''
 
 import numpy as np
@@ -35,7 +37,8 @@ def xavier_weight_init():
         # sum of sizes of shape's dimensions
         sum_of_sizes_of_shape_d = 0
         for i in range(len(shape)):
-            sum_of_sizes_of_shape_d += shape[i]
+            if shape[i]:
+                sum_of_sizes_of_shape_d += shape[i]
 
         # calculate our epsilon
         epsilon = np.sqrt(6) / np.sqrt(sum_of_sizes_of_shape_d)
