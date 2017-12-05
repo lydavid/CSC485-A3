@@ -1,0 +1,63 @@
+================================================================================
+INITIALIZING
+================================================================================
+Loading word embeddings...there are 4003 word embeddings.
+Determining POS tags...there are 17 tags.
+Determining deprel labels...there are 39 deprel labels.
+Getting training data...there are 583060 samples.
+Getting dev data...there are 1700 samples.
+Getting test data...there are 2416 samples.
+Word feat size: 18, tag feat size: 18, deprel feat size: 12, classes size: 83
+2017-12-05 04:03:51.236965: I C:\tf_jenkins\home\workspace\rel-win\M\windows\PY\35\tensorflow\core\platform\cpu_feature_guard.cc:137] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX AVX2
+Building model... took 0.64 seconds
+
+================================================================================
+TRAINING
+================================================================================
+Epoch 0
+583060/583060 [==============================] - 71s 123us/step - Cross-entropy: 0.7878
+Validation LAS: 0.70 (BEST!),
+Validation UAS: 0.73
+Epoch 1
+583060/583060 [==============================] - 70s 120us/step - Cross-entropy: 0.2911
+Validation LAS: 0.73 (BEST!),
+Validation UAS: 0.76
+Epoch 2
+583060/583060 [==============================] - 71s 122us/step - Cross-entropy: 0.2286
+Validation LAS: 0.74 (BEST!),
+Validation UAS: 0.77
+Epoch 3
+583060/583060 [==============================] - 71s 123us/step - Cross-entropy: 0.1999
+Validation LAS: 0.75 (BEST!),
+Validation UAS: 0.78
+Epoch 4
+583060/583060 [==============================] - 71s 122us/step - Cross-entropy: 0.1803
+Validation LAS: 0.75 (BEST!),
+Validation UAS: 0.78
+Epoch 5
+583060/583060 [==============================] - 71s 121us/step - Cross-entropy: 0.1672
+Validation LAS: 0.76 (BEST!),
+Validation UAS: 0.78
+Epoch 6
+583060/583060 [==============================] - 72s 123us/step - Cross-entropy: 0.1556
+Validation LAS: 0.76 (BEST!),
+Validation UAS: 0.78
+Epoch 7
+583060/583060 [==============================] - 70s 120us/step - Cross-entropy: 0.1469
+Validation LAS: 0.76 (BEST!),
+Validation UAS: 0.78
+Epoch 8
+583060/583060 [==============================] - 71s 123us/step - Cross-entropy: 0.1394
+Validation LAS: 0.77 (BEST!),
+Validation UAS: 0.79
+Epoch 9
+583060/583060 [==============================] - 73s 125us/step - Cross-entropy: 0.1337
+Validation LAS: 0.77 (BEST!),
+Validation UAS: 0.79
+
+================================================================================
+TESTING
+================================================================================
+Restoring the best model weights found on the dev set
+Test LAS: 0.76, Test UAS: 0.79
+Done!

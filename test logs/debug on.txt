@@ -1,0 +1,43 @@
+================================================================================
+TRAINING
+================================================================================
+Epoch 0
+6144/6144 [==============================] - 1s 120us/step - Cross-entropy: 4.3709
+Validation LAS: 0.00,
+Validation UAS: 0.00
+Epoch 1
+6144/6144 [==============================] - 1s 114us/step - Cross-entropy: 2.9256
+Validation LAS: 0.00,
+Validation UAS: 0.00
+Epoch 2
+6144/6144 [==============================] - 1s 115us/step - Cross-entropy: 2.5621
+Validation LAS: 0.00 (BEST!),
+Validation UAS: 0.00
+Epoch 3
+6144/6144 [==============================] - 1s 112us/step - Cross-entropy: 2.1436
+Validation LAS: 0.04 (BEST!),
+Validation UAS: 0.06
+Epoch 4
+6144/6144 [==============================] - 1s 125us/step - Cross-entropy: 1.9500
+Validation LAS: 0.10 (BEST!),
+Validation UAS: 0.16
+Epoch 5
+6144/6144 [==============================] - 1s 114us/step - Cross-entropy: 1.7519
+Validation LAS: 0.10,
+Validation UAS: 0.14
+Epoch 6
+6144/6144 [==============================] - 1s 112us/step - Cross-entropy: 1.5796
+Validation LAS: 0.09,
+Validation UAS: 0.11
+Epoch 7
+6144/6144 [==============================] - 1s 114us/step - Cross-entropy: 1.4536
+Validation LAS: 0.12 (BEST!),
+Validation UAS: 0.16
+Epoch 8
+6144/6144 [==============================] - 1s 112us/step - Cross-entropy: 1.3510
+Validation LAS: 0.18 (BEST!),
+Validation UAS: 0.25
+Epoch 9
+6144/6144 [==============================] - 1s 113us/step - Cross-entropy: 1.2341
+Validation LAS: 0.22 (BEST!),
+Validation UAS: 0.32
