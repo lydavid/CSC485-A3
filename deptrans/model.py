@@ -146,13 +146,20 @@ class ParserModel(Model):
         feed_dict[self.deprel_id_placeholder] = deprel_id_batch#tf.constant(deprel_id_batch, dtype=tf.int32)
 
 
+        if not (class_batch is None):
+            feed_dict[self.class_placeholder] = class_batch
 
-        if isinstance(class_batch, list):
-            if class_batch.any():
-                feed_dict[self.class_placeholder] = class_batch#tf.constant(class_batch, dtype=tf.float32)
+        #if isinstance(class_batch, tuple):
+            #tf.constant(class_batch, dtype=tf.float32)
+        #    if class_batch:
+        #        feed_dict[self.class_placeholder] = class_batch
+        #else:
+        #    if class_batch.any():
+        #        feed_dict[self.class_placeholder] = class_batch
+            
 
-        if dropout:
-            feed_dict[self.dropout_placeholder] = dropout#tf.constant(dropout, dtype=tf.float32)
+        #if dropout:
+        feed_dict[self.dropout_placeholder] = dropout#tf.constant(dropout, dtype=tf.float32)
 
         ### END YOUR CODE
         return feed_dict
@@ -355,7 +362,7 @@ class ParserModel(Model):
         ### BEGIN YOUR CODE
 
         # what are the logits here?
-        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=pred, logits=pred))
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.class_placeholder, logits=pred))
 
         ### END YOUR CODE
         return loss
