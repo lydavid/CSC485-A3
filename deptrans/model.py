@@ -120,46 +120,14 @@ class ParserModel(Model):
 
         feed_dict = {}
 
-        #print("word_id_batch")
-        #print(word_id_batch)
-
-        #if isinstance(word_id_batch, list):
-
-        #    if any(word_id_batch):
-        feed_dict[self.word_id_placeholder] = word_id_batch#tf.constant(word_id_batch, dtype=tf.int32) # word_id_batch (if this is already a tensor of data ex. [1,2,3])
-
-
-        #print("tag_id_batch")
-        #print(tag_id_batch)
-
-        #if isinstance(tag_id_batch, list):
-
-        #    if any(tag_id_batch):
-        feed_dict[self.tag_id_placeholder] = tag_id_batch#tf.constant(tag_id_batch, dtype=tf.int32)
-
-        #print("deprel_id_batch")
-        #print(deprel_id_batch)
-
-        #if isinstance(deprel_id_batch, list):
-
-        #    if any(deprel_id_batch):
-        feed_dict[self.deprel_id_placeholder] = deprel_id_batch#tf.constant(deprel_id_batch, dtype=tf.int32)
-
+        feed_dict[self.word_id_placeholder] = word_id_batch
+        feed_dict[self.tag_id_placeholder] = tag_id_batch
+        feed_dict[self.deprel_id_placeholder] = deprel_id_batch
 
         if not (class_batch is None):
-            feed_dict[self.class_placeholder] = class_batch
+            feed_dict[self.class_placeholder] = class_batch 
 
-        #if isinstance(class_batch, tuple):
-            #tf.constant(class_batch, dtype=tf.float32)
-        #    if class_batch:
-        #        feed_dict[self.class_placeholder] = class_batch
-        #else:
-        #    if class_batch.any():
-        #        feed_dict[self.class_placeholder] = class_batch
-            
-
-        #if dropout:
-        feed_dict[self.dropout_placeholder] = dropout#tf.constant(dropout, dtype=tf.float32)
+        feed_dict[self.dropout_placeholder] = dropout
 
         ### END YOUR CODE
         return feed_dict
@@ -202,17 +170,7 @@ class ParserModel(Model):
         # but to also lookup embeddings corresponding to the deprel_ids, word_ids, and tag_ids that you feed in through create_feed_dict(). 
         # The return value should therefore be the word_embeddings, tag_embeddings, and deprel_embeddings corresponding to the ids provided by the placeholders.
 
-
-        # need to somehow access the word_ids I fed in from create_feed_dict() -> but how?
-        # using lookup on them
-
-
-        # - Create 3 embedding matrices, one for each of the input types.
-
-        # ex
-        # word_embeddings = tf.get_variable(“word_embeddings”, [vocabulary_size, embedding_size])
-        # embedded_word_ids = tf.nn.embedding_lookup(word_embeddings, word_ids)
-
+        # - Initialize the word_id embedding matrix with self.word_embeddings. 
         word_embeddings = tf.Variable(self.word_embeddings, dtype=tf.float32)
         word_embeddings = tf.nn.embedding_lookup(word_embeddings, self.word_id_placeholder)
 
@@ -222,23 +180,7 @@ class ParserModel(Model):
         #   After lookup, the resulting tensors should each be of shape (None, n, embed_size), 
         # where n is one of {n_word_features, n_tag_features, n_deprel_features}.
 
-
-        # - Initialize the word_id embedding matrix with self.word_embeddings. 
-
-
         # Initialize the other two matrices with the Xavier initialization you implemented
-
-
-
-        # - Reshape the embedding tensors into shapes (None, n * embed_size)
-
-
-
-
-
-
-        #word_embeddings = tf.Variable(self.word_embeddings, dtype=tf.float32)
-
         xavier_initializer = xavier_weight_init()
 
         # embeddings for tags
@@ -253,15 +195,8 @@ class ParserModel(Model):
         deprel_embeddings = tf.Variable(xavier_mat, dtype=tf.float32)
         deprel_embeddings = tf.nn.embedding_lookup(deprel_embeddings, self.deprel_id_placeholder)
 
-
-
-        # reshape
-
-        # ValueError: Dimension size must be evenly divisible by 900 but is 200150 for 'Reshape' (op: 'Reshape') with input shapes: 
-        # [4003,50], [2] and with input tensors computed as partial shapes: input[1] = [?,900].
-
-
-        word_embeddings = tf.reshape(word_embeddings, [-1, self.config.n_word_features * self.config.embed_size]) # error coming from here
+        # - Reshape the embedding tensors into shapes (None, n * embed_size)
+        word_embeddings = tf.reshape(word_embeddings, [-1, self.config.n_word_features * self.config.embed_size])
         tag_embeddings = tf.reshape(tag_embeddings, [-1, self.config.n_tag_features * self.config.embed_size])
         deprel_embeddings = tf.reshape(deprel_embeddings, [-1, self.config.n_deprel_features * self.config.embed_size])
 
@@ -361,7 +296,6 @@ class ParserModel(Model):
         """
         ### BEGIN YOUR CODE
 
-        # what are the logits here?
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.class_placeholder, logits=pred))
 
         ### END YOUR CODE
@@ -385,7 +319,6 @@ class ParserModel(Model):
         ### BEGIN YOUR CODE
 
         optimizer = tf.train.AdamOptimizer()
-
         train_op = optimizer.minimize(loss)
         
         ### END YOUR CODE
@@ -528,4 +461,4 @@ def main(debug):
     return 0
 
 if __name__ == '__main__':
-    main(True)
+    main(False)
