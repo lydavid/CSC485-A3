@@ -120,20 +120,39 @@ class ParserModel(Model):
 
         feed_dict = {}
 
-        if word_id_batch:
-            feed_dict[self.word_id_placeholder] = tf.constant(word_id_batch, dtype=tf.int32) # make these constant Tensor?
+        #print("word_id_batch")
+        #print(word_id_batch)
 
-        if tag_id_batch:
-            feed_dict[self.tag_id_placeholder] = tf.constant(tag_id_batch, dtype=tf.int32)
+        #if isinstance(word_id_batch, list):
 
-        if deprel_id_batch:
-            feed_dict[self.deprel_id_placeholder] = tf.constant(deprel_id_batch, dtype=tf.int32)
+        #    if any(word_id_batch):
+        feed_dict[self.word_id_placeholder] = word_id_batch#tf.constant(word_id_batch, dtype=tf.int32) # word_id_batch (if this is already a tensor of data ex. [1,2,3])
 
-        if class_batch:
-            feed_dict[self.class_placeholder] = tf.constant(class_batch, dtype=tf.float32)
+
+        #print("tag_id_batch")
+        #print(tag_id_batch)
+
+        #if isinstance(tag_id_batch, list):
+
+        #    if any(tag_id_batch):
+        feed_dict[self.tag_id_placeholder] = tag_id_batch#tf.constant(tag_id_batch, dtype=tf.int32)
+
+        #print("deprel_id_batch")
+        #print(deprel_id_batch)
+
+        #if isinstance(deprel_id_batch, list):
+
+        #    if any(deprel_id_batch):
+        feed_dict[self.deprel_id_placeholder] = deprel_id_batch#tf.constant(deprel_id_batch, dtype=tf.int32)
+
+
+
+        if isinstance(class_batch, list):
+            if class_batch.any():
+                feed_dict[self.class_placeholder] = class_batch#tf.constant(class_batch, dtype=tf.float32)
 
         if dropout:
-            feed_dict[self.dropout_placeholder] = tf.constant(dropout, dtype=tf.float32)
+            feed_dict[self.dropout_placeholder] = dropout#tf.constant(dropout, dtype=tf.float32)
 
         ### END YOUR CODE
         return feed_dict
@@ -171,18 +190,73 @@ class ParserModel(Model):
         """
         ### BEGIN YOUR CODE
 
+        # TA:
+        # The add_embeddings() function should be used to not only create and initialize the embeddings, 
+        # but to also lookup embeddings corresponding to the deprel_ids, word_ids, and tag_ids that you feed in through create_feed_dict(). 
+        # The return value should therefore be the word_embeddings, tag_embeddings, and deprel_embeddings corresponding to the ids provided by the placeholders.
+
+
+        # need to somehow access the word_ids I fed in from create_feed_dict() -> but how?
+        # using lookup on them
+
+
+        # - Create 3 embedding matrices, one for each of the input types.
+
+        # ex
+        # word_embeddings = tf.get_variable(“word_embeddings”, [vocabulary_size, embedding_size])
+        # embedded_word_ids = tf.nn.embedding_lookup(word_embeddings, word_ids)
+
         word_embeddings = tf.Variable(self.word_embeddings, dtype=tf.float32)
+        word_embeddings = tf.nn.embedding_lookup(word_embeddings, self.word_id_placeholder)
+
+        #   Input values index the rows of the matrices to extract. 
+        # The max bound (exclusive) on the values in the input can be found in {n_word_ids, n_tag_ids, n_deprel_ids}
+
+        #   After lookup, the resulting tensors should each be of shape (None, n, embed_size), 
+        # where n is one of {n_word_features, n_tag_features, n_deprel_features}.
+
+
+        # - Initialize the word_id embedding matrix with self.word_embeddings. 
+
+
+        # Initialize the other two matrices with the Xavier initialization you implemented
+
+
+
+        # - Reshape the embedding tensors into shapes (None, n * embed_size)
+
+
+
+
+
+
+        #word_embeddings = tf.Variable(self.word_embeddings, dtype=tf.float32)
 
         xavier_initializer = xavier_weight_init()
-        shape = (1,)
+
+        # embeddings for tags
+        shape = (self.config.n_tag_ids, self.config.embed_size)
         xavier_mat = xavier_initializer(shape)
-
         tag_embeddings = tf.Variable(xavier_mat, dtype=tf.float32)
+        tag_embeddings = tf.nn.embedding_lookup(tag_embeddings, self.tag_id_placeholder)
+
+        # embeddings for arc-labels
+        shape = (self.config.n_deprel_ids, self.config.embed_size)
+        xavier_mat = xavier_initializer(shape)
         deprel_embeddings = tf.Variable(xavier_mat, dtype=tf.float32)
+        deprel_embeddings = tf.nn.embedding_lookup(deprel_embeddings, self.deprel_id_placeholder)
 
-        # use tf.Variable
 
-        # tf.nn.embedding_lookup
+
+        # reshape
+
+        # ValueError: Dimension size must be evenly divisible by 900 but is 200150 for 'Reshape' (op: 'Reshape') with input shapes: 
+        # [4003,50], [2] and with input tensors computed as partial shapes: input[1] = [?,900].
+
+
+        word_embeddings = tf.reshape(word_embeddings, [-1, self.config.n_word_features * self.config.embed_size]) # error coming from here
+        tag_embeddings = tf.reshape(tag_embeddings, [-1, self.config.n_tag_features * self.config.embed_size])
+        deprel_embeddings = tf.reshape(deprel_embeddings, [-1, self.config.n_deprel_features * self.config.embed_size])
 
         ### END YOUR CODE
         return word_embeddings, tag_embeddings, deprel_embeddings
@@ -236,7 +310,6 @@ class ParserModel(Model):
         xavier_mat = xavier_initializer(shape)
         W_d = tf.Variable(xavier_mat, dtype=tf.float32)
 
-
         b1 = tf.Variable(tf.zeros(shape=(self.config.hidden_size, )), dtype=tf.float32)
 
         shape = (self.config.hidden_size, self.config.n_classes)
@@ -245,20 +318,20 @@ class ParserModel(Model):
 
         b2 = tf.Variable(tf.zeros(shape=(self.config.n_classes)), dtype=tf.float32)
 
-        h = tf.nn.relu(x_w * W_w + x_t * W_t + x_d * W_d + b1)
+        w = tf.matmul(x_w, W_w) # [?, 900] [900, 200]
+        t = tf.matmul(x_t, W_t) # [?, 900] [900, 200]
+        d = tf.matmul(x_d, W_d) # [?, 600] [600, 200]
+        
+        
+        wt = tf.add(w, t)
+        wtd = tf.add(wt, d) # for some reason d is a different size from the others
+        wtdb = tf.add(wtd, b1)
 
+        h = tf.nn.relu(wtdb)
 
+        #h = tf.nn.relu((x_w * W_w) + (x_t * W_t) + (x_d * W_d) + b1)
         h_drop = tf.nn.dropout(h, self.dropout_placeholder)
-
-        # dropout(
-        #    x,
-        #    keep_prob, -> self.dropout_placeholder
-        #    noise_shape=None,
-        #    seed=None,
-        #    name=None
-        #)
-
-        pred = tf.Tensor(h_drop * U + b2, shape=(self.config.batch_size, self.config.n_classes))
+        pred = tf.matmul(h_drop, U) + b2 #tf.constant(tf.matmul(h_drop, U) + b2, shape=(self.config.batch_size, self.config.n_classes))
 
         ### END YOUR CODE
         return pred
@@ -281,7 +354,8 @@ class ParserModel(Model):
         """
         ### BEGIN YOUR CODE
 
-
+        # what are the logits here?
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=pred, logits=pred))
 
         ### END YOUR CODE
         return loss
@@ -303,7 +377,9 @@ class ParserModel(Model):
         """
         ### BEGIN YOUR CODE
 
-        
+        optimizer = tf.train.AdamOptimizer()
+
+        train_op = optimizer.minimize(loss)
         
         ### END YOUR CODE
         return train_op
