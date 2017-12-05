@@ -107,10 +107,13 @@ class PartialParse(object):
 
             # should always be able to RIGHT-ARC, the final RIGHT-ARC is assigning the head word as dependent of ROOT
 
+            if len(self.stack) < 2:
+                raise ValueError("Illegal transition_id: Cannot RIGHT-ARC: Stack is too small.")
+
             idx_head = self.stack[-2]
             idx_dep = self.stack.pop(-1)
             new_dependency = (idx_head, idx_dep, deprel)
-            self.arcs.append(new_dependency)
+            self.arcs.append(new_dependency)            
 
         elif transition_id == self.shift_id:
             # SHIFT: removes the first word from the buffer and pushes it onto the stack
@@ -125,7 +128,9 @@ class PartialParse(object):
         else:
             raise ValueError('Invalid transition_id.')
 
+
         ### END STUDENT CODE
+
 
     def get_n_leftmost_deps(self, sentence_idx, n=None):
         '''Returns a list of n leftmost dependants of word
@@ -409,8 +414,6 @@ def minibatch_parse(sentences, model, batch_size):
             # Remember that calls to parse_step may raise a ValueError exception.
             try:
 
-                # Perform a parse step on each partial_parse in the minibatch with its predicted transition;
-
                 # find the same initial obj in partial_parses
                 # we do this, because after some removals form unfinished_parses, it will no longer be parallel to partial_parses
                 for i in range(0, len(partial_parses)):
@@ -677,9 +680,47 @@ word_5 tag_5 1 deprel_5
             transition_ids, ex_tids)
     print('oracle test passed!')
 
+def test_oracle2():
+    """Make sure that the oracle is able to build the correct arcs in order"""
+    graph_data = """\
+Nadia PROPN 2 nsubj
+rode VERB 0 ROOT
+the DET 5 det
+old ADJ 5 amod
+donkey NOUN 2 dobj
+with ADP 2 prep
+dexterity NOUN 6 pobj
+"""
+    graph = DependencyGraph(graph_data)
+    pp = PartialParse(get_sentence_from_graph(graph))
+    transition_ids = []
+    while not pp.complete:
+        transition_id, deprel = pp.get_oracle(graph)
+        transition_ids.append(transition_id)
+        pp.parse_step(transition_id, deprel)
+    _test_arcs(
+        "oracle", pp,
+        [
+            (2, 1, 'nsubj'), (0, 2, 'ROOT'), (5, 3, 'det'),
+            (5, 4, 'amod'), (2, 5, 'dobj'), (2, 6, 'prep'), (6, 7, 'pobj')
+        ]
+    )
+    ex_tids = [
+        pp.shift_id, pp.shift_id, pp.left_arc_id,
+        pp.shift_id, pp.shift_id, pp.shift_id,
+        pp.left_arc_id, pp.left_arc_id, pp.right_arc_id,
+        pp.shift_id, pp.shift_id,
+        pp.right_arc_id, pp.right_arc_id, pp.right_arc_id
+    ]
+    assert transition_ids == ex_tids, \
+        "oracle2 test resulted in transitions {}, expected {}".format(
+            transition_ids, ex_tids)
+    print('oracle2 test passed!')
+
 if __name__ == '__main__':
     test_parse_steps()
     test_parse()
     test_leftmost_rightmost()
     test_minibatch_parse()
     test_oracle()
+    test_oracle2()
